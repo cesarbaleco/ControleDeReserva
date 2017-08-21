@@ -45,3 +45,19 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+*.map
+*.bc
+*.EXE
+cr.xTag
+*.bat
+*.tds
+*.cdx
+DATA/DISPOR.DBF
+*.log
+*.c
+*.obj
+*.ppo
+VERSAO.CONFIG
+DATA/PESSOA.DBF
+DATA/RESERVAS.DBF
+DATA/RESERVA.DBF

@@ -1,0 +1,41 @@
+<!--
+################################################
+# xDevStudio Project - xdev@kssoftware.com.br  #
+# Created @ 03/08/2017 10:57:45                #
+#                                              #
+### Standard xDev Config - Layout v1.5 #########
+-->
+<project>
+   <option compiler="729685">
+   <option outputname="CR">
+   <option targettype="EXE">
+   <option outputpath="">
+   <option root="($)">
+   <option runpath="">
+   <option runparams="">
+   <option pathch="include">
+   <option pathlib="lib">
+   <option pathobj="">
+   <option pathtooutput="obj">
+   <option defines="">
+   <option webframework="">
+   <option webrootdir="">
+   <option documentroot="">
+   <option custombrowser="">
+   <option makeincfile="Não">
+   <option taskprepare="">
+   <option taskfinalize="">
+   <option taskgroupprepare="">
+   <option taskgroupfinalize="">
+
+   <compilerparam name="FiveWin32.xCompiler">
+      <option presetsname="471317,449997,729685">
+      <option rdd2="Sim">
+      <option fflagp="Sim">
+   </compilerparam>
+
+   <unit filename="src\repositorio.prg" compile="Sim" prg_disabledebug="Não">
+   <unit filename="src\principal.prg" main="true" compile="Sim" prg_disabledebug="Não">
+   <unit filename="res\reserva1.res" compile="Sim">
+   <unit filename="include\CR.CH" compile="Sim">
+</project>
