@@ -9,4 +9,4 @@
 #define CLR_DIALOGS RGB( 123, 140, 223 )
 
 #define SIS_NAME "Controle de Reserva"
-#define SIS_VERSAO "2017.01"
+#define SIS_VERSAO "2017.02"

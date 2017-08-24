@@ -1,7 +1,7 @@
 <!--
 ################################################
 # xDevStudio Project - xdev@kssoftware.com.br  #
-# Created @ 03/08/2017 10:57:45                #
+# Created @ 23/08/2017 09:29:24                #
 #                                              #
 ### Standard xDev Config - Layout v1.5 #########
 -->
@@ -34,8 +34,8 @@
       <option fflagp="Sim">
    </compilerparam>
 
-   <unit filename="src\repositorio.prg" compile="Sim" prg_disabledebug="Não">
-   <unit filename="src\principal.prg" main="true" compile="Sim" prg_disabledebug="Não">
+   <unit filename="src\repositorio.prg" compile="Sim">
+   <unit filename="src\principal.prg" main="true" compile="Sim">
    <unit filename="res\reserva1.res" compile="Sim">
    <unit filename="include\CR.CH" compile="Sim">
 </project>

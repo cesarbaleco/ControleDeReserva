@@ -278,6 +278,21 @@ Function NomeDoAluno(nIdAluno)
    set order to 1
    seek nIDAluno
    return alltrim(pessoa->nome)
+Function PreencherDisponibilidade(vDia,tDisponibilidade,aDisponibilidade,vHora,oHora)
+			if len(aDisponibilidade)>0
+				nPosicao := Ascan(aDisponibilidade,{|item|item[1]==PegaNrDia(vDia)})
+				if nPosicao > 0
+					tDisponibilidade:=aDisponibilidade[nPosicao][2]
+					if len(tDisponibilidade) > 0
+						oHora:SetItems(tDisponibilidade)
+					   oHora:Select(1)
+						oHora:Refresh()
+					endif   
+					return .t.
+				endif
+				return .f.
+			endif
+			return .t.
 Function NomeDoDia(oDia,vDia,dData)
    vDia:= OemToAnsi(CDoW(dData))
    oDia:Refresh()
@@ -287,8 +302,8 @@ Function NomeDoDia(oDia,vDia,dData)
 Function Reservar(nIdReserva)
    Local oDataReserva,dDataReserva
    Local oHoraIni,vHoraIni,lSair:=.f.
-   Local oHoraFim,vHoraFim,oDia,vDia
-   local oDlg, oFont1, oFont2, lOk := .F.
+   Local oHoraFim,vHoraFim,oDia,vDia,aDisponibilidade:={},tDisponibilidade:={}
+   local oDlg, oFont1, oFont2, lOk := .F.,vHora:=""
    vDia:=""
    aDados:=Reservar_PegaDadosDeHoje(nIdReserva)
    *
@@ -328,13 +343,34 @@ Function Reservar(nIdReserva)
    OrdScope(0,nIdReserva)
    OrdScope(1,nIdReserva)
    GO TOP
+   
+   SELECT disporFiltro
+   GO TOP
+   While !Eof()
+			aadd(aDisponibilidade,{disporFiltro->DIA,{}})
+			nRegistro:=len(aDisponibilidade)
+			cHora:=disporFiltro->HRINI
+			*
+			While cHora <= disporFiltro->HRFIM
+			      tHora:=TString(Secs(cHora)+Secs(disporFiltro->LIMITE))
+					if tHora > disporFiltro->HRFIM
+						tHora := disporFiltro->HRFIM
+					endif
+					aadd(aDisponibilidade[nRegistro][2],cHora+"-"+tHora)
+					cHora:=Secs(tHora)+1
+					cHora:=TString(cHora)
+			end
+			skip
+	End
    *
    
-	
+	SELECT disporFiltro
+   GO TOP
+	*
    if oFont1 == nil
       DEFINE FONT oFont1 NAME "Segoe UI Light" SIZE 0, -30 BOLD
    endif
-
+	*
    DEFINE FONT oFont2 NAME "Segoe UI Light" SIZE 10,26 BOLD
    DEFINE FONT oFontbRW NAME "Segoe UI Light" SIZE 10,28 BOLD
    *
@@ -342,24 +378,30 @@ Function Reservar(nIdReserva)
     SIZE ScreenWidth(), (ScreenHeight() / 2) +100;
     COLOR CLR_WHITE, CLR_DIALOGS PIXEL
    *
-   @ 20, 15  SAY "Por favor insira a data e hora que deseja reservar" FONT oFont1 TRANSPARENT PIXEL
+   @ 20, 15  SAY "Por favor insira a data e hora que deseja reservar" FONT oFont1 TRANSPARENT PIXEL OF oDlg
    
    *
-   @ 50, 45 SAY "Data para Reserva:" FONT oFont2 TRANSPARENT PIXEL
-   @ 50, 130 Get oDataReserva VAR dDataReserva FONT oFont2 SIZE 60, 14 valid NomeDoDia(oDia,@vDia,dDataReserva) PICTURE "@D"  PIXEL CENTER
-   @ 50, 200 SAY oDia var vDia FONT oFont2 TRANSPARENT PIXEL SIZE 100, 14
+   @ 50, 45 SAY "Data para Reserva:" FONT oFont2 TRANSPARENT PIXEL OF oDlg
+   @ 50, 130 Get oDataReserva VAR dDataReserva FONT oFont2 SIZE 60, 14 valid NomeDoDia(oDia,@vDia,dDataReserva) .and. PreencherDisponibilidade(vDia,@tDisponibilidade,aDisponibilidade,@vHora,@oHora) PICTURE "@D"  PIXEL CENTER UPDATE OF oDlg
+   @ 50, 200 SAY oDia var vDia FONT oFont2 TRANSPARENT PIXEL SIZE 100, 14 OF oDlg
    *
-   @ 65, 45 SAY "Hora Inicial:" FONT oFont2 TRANSPARENT PIXEL
-   @ 65, 130 GET oHoraIni var vHoraIni FONT oFont2 SIZE 60, 14 COLOR "N*/W" NOBORDER valid .t. PICTURE "99:99:99" PIXEL   CENTER
-   *
-   @ 80, 45 SAY "Hora Final:" FONT oFont2 TRANSPARENT PIXEL
-   @ 80, 130 GET oHoraFim var vHoraFim FONT oFont2 SIZE 60, 14 COLOR "N*/W" NOBORDER valid .t. PICTURE "99:99:99" PIXEL  CENTER
+   IF LEN(aDisponibilidade) > 0
+		@ 65, 45 SAY "Hora:" FONT oFont2 TRANSPARENT PIXEL OF oDlg
+	   @ 65, 130 COMBOBOX oHora VAR vHora ITEMS tDisponibilidade FONT oFont2 SIZE 120, 14 COLOR "N*/W" PIXEL UPDATE OF oDlg
+	
+	ELSE
+		@ 65, 45 SAY "Hora Inicial:" FONT oFont2 TRANSPARENT PIXEL OF oDlg
+	   @ 65, 130 GET oHoraIni var vHoraIni FONT oFont2 SIZE 60, 14 COLOR "N*/W" NOBORDER valid .t. PICTURE "99:99:99" PIXEL   CENTER UPDATE OF oDlg
+	   *
+	   @ 80, 45 SAY "Hora Final:" FONT oFont2 TRANSPARENT PIXEL OF oDlg
+	   @ 80, 130 GET oHoraFim var vHoraFim FONT oFont2 SIZE 60, 14 COLOR "N*/W" NOBORDER valid .t. PICTURE "99:99:99" PIXEL  CENTER UPDATE OF oDlg
+   ENDIF
    *
    @ 200, ScreenWidth() / 5 + 100 FLATBTN PROMPT "Ok" ;
-    SIZE 50, 20 ACTION ( lOk := .T., oDlg:End() ) FONT oFont2 PIXEL
+    SIZE 50, 20 ACTION ( lOk := .T., oDlg:End() ) FONT oFont2 PIXEL OF oDlg
    *
    @ 200, ScreenWidth() / 5 + 170 FLATBTN PROMPT "Cancel" ;
-    SIZE 50, 20 ACTION (lOk:=.f.,oDlg:End()) FONT oFont2  cancel PIXEL
+    SIZE 50, 20 ACTION (lOk:=.f.,oDlg:End()) FONT oFont2  cancel PIXEL  OF oDlg
    *
    @ 095,45 SAY "Disponibilidade" FONT oFont2 TRANSPARENT PIXEL
    @ 110,45 XBROWSE oBrwDisponibilidade OF oDlg SIZE 235,100 PIXEL ;
@@ -417,7 +459,7 @@ Function Reservar(nIdReserva)
       *
       oBrw:CreateFromCode()
    endif
-   ACTIVATE DIALOG oDlg CENTERED valid Reservar_Valid(@lOk,nIdReserva,dDataReserva,vHoraIni,vHoraFim)
+   ACTIVATE DIALOG oDlg CENTERED valid Reservar_Valid(@lOk,nIdReserva,dDataReserva,@vHoraIni,@vHoraFim,@vHora,oDlg)
    
    if lOk
       select reservas
@@ -456,13 +498,28 @@ Function Reservar_PopupMenu(oBrw,nRow,nCol)
    MENUITEM "Remover reserva" ACTION iif( MsgYesNo("Deseja realmente remover?","Pergunta"),oBrw:Delete(),.t. ) When !oBrw:Eof()
    ENDMENU
    ACTIVATE MENU oMenu OF oBrw  AT nRow,nCol
-Function Reservar_Valid(lOk,nIdReserva,dDataReserva,hHoraIni,hHoraFim)
+Function Reservar_Valid(lOk,nIdReserva,dDataReserva,hHoraIni,hHoraFim,hHora,oDlg)
    Local lReturn:=.t.
-   if !lOk
+   Default hHora:=""
+	if !lOk
       return .t.
    endif
-   if hHoraIni > hHoraFim
+   if !Empty(hHora)
+		hHoraIni := StrToken(hHora,1,"-")
+		hHoraFim := StrToken(hHora,2,"-")
+	endif	
+	
+	if hHoraIni > hHoraFim
       MsgAlert("Hora inicial maior que hora final!","Atenção")
+		oDlg:Update()
+      oDlg:Refresh()
+		return .f.
+   endif
+
+	if hHoraIni == hHoraFim
+      MsgAlert("Hora inicial igual a hora final, não forma período!","Atenção")
+		oDlg:Update()
+      oDlg:Refresh()
       return .f.
    endif
    *
@@ -470,12 +527,16 @@ Function Reservar_Valid(lOk,nIdReserva,dDataReserva,hHoraIni,hHoraFim)
       if Secs(hHoraIni) < Secs(time())
          MsgAlert("Hora inicial menor que hora atual!","Atenção")
          lOk:=.f.
+		oDlg:Update()
+      oDlg:Refresh()
          return .f.
       endif
       *
       if Secs(hHoraFim) < Secs(time())
          MsgAlert("Hora Final menor que hora atual!","Atenção")
          lOk:=.f.
+		oDlg:Update()
+      oDlg:Refresh()
          return .f.
       endif
    endif
@@ -483,6 +544,8 @@ Function Reservar_Valid(lOk,nIdReserva,dDataReserva,hHoraIni,hHoraFim)
    if dDataReserva < date()
       MsgAlert("Data da reserva não pode ser menor que a data atual!","Atenção")
       lOk:=.f.
+		oDlg:Update()
+      oDlg:Refresh()
       return .f.
    endif
    *
@@ -567,6 +630,8 @@ Function Reservar_Valid(lOk,nIdReserva,dDataReserva,hHoraIni,hHoraFim)
 			endif
       EndIf
    End
+		oDlg:Update()
+      oDlg:Refresh()
    return lReturn
 Function Reservar_PegaDadosDeHoje(nId)
    lStatus:=.t.
@@ -703,6 +768,10 @@ Function CarregarDias()
    aadd(aDia,"Sábado")
    aadd(aDia,"Domingo")
    return aDia
+
+Function PegaNrDia(cDia)
+   Local aDia:=CarregarDias()
+	return Ascan(aDia,{|Item| item == cDia })
 
 Function ManterDisponibilidade_Excluir(oBrw,nIDReserva)
 			if MsgYesNo("Ao excluir a disponibilidade as reservas podem sofrer alterações!"+CRLF+"Deseja realmente excluir?","Pergunta")
