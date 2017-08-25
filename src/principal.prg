@@ -403,23 +403,25 @@ Function Reservar(nIdReserva)
    @ 200, ScreenWidth() / 5 + 170 FLATBTN PROMPT "Cancel" ;
     SIZE 50, 20 ACTION (lOk:=.f.,oDlg:End()) FONT oFont2  cancel PIXEL  OF oDlg
    *
-   @ 095,45 SAY "Disponibilidade" FONT oFont2 TRANSPARENT PIXEL
-   @ 110,45 XBROWSE oBrwDisponibilidade OF oDlg SIZE 235,100 PIXEL ;
-    ALIAS 'disporFiltro' FIELDS DiaDaSemana(disporFiltro->DIA),disporFiltro->HRINI,disporFiltro->HRFIM,disporFiltro->LIMITE ;
-    HEADERS "Dia","Hr.Inicial","Hr.Fim","Limite";
-    COLORS CLR_WHITE, CLR_DIALOGS FONT oFontbRW
-   *
-   oBrwDisponibilidade:bClrHeader := {||{CLR_WHITE, CLR_DIALOGS}}
-   oBrwDisponibilidade:nMarqueeStyle       := 4
-   oBrwDisponibilidade:nColDividerStyle    := LINESTYLE_DARKGRAY
-   oBrwDisponibilidade:nRowDividerStyle    := LINESTYLE_DARKGRAY
-   oBrwDisponibilidade:lColDividerComplete := .T.
-   oBrwDisponibilidade:lFastEdit           := .F.
-   oBrwDisponibilidade:lHScroll            := .F.
-   oBrwDisponibilidade:lVScroll            := .F.
-   oBrwDisponibilidade:l2007               := .F.
-   *
-   oBrwDisponibilidade:CreateFromCode()
+   IF LEN(aDisponibilidade)>0
+	   @ 095,45 SAY "Disponibilidade" FONT oFont2 TRANSPARENT PIXEL
+	   @ 110,45 XBROWSE oBrwDisponibilidade OF oDlg SIZE 235,100 PIXEL ;
+	    ALIAS 'disporFiltro' FIELDS DiaDaSemana(disporFiltro->DIA),disporFiltro->HRINI,disporFiltro->HRFIM,disporFiltro->LIMITE ;
+	    HEADERS "Dia","Hr.Inicial","Hr.Fim","Limite";
+	    COLORS CLR_WHITE, CLR_DIALOGS FONT oFontbRW
+	   *
+	   oBrwDisponibilidade:bClrHeader := {||{CLR_WHITE, CLR_DIALOGS}}
+	   oBrwDisponibilidade:nMarqueeStyle       := 4
+	   oBrwDisponibilidade:nColDividerStyle    := LINESTYLE_DARKGRAY
+	   oBrwDisponibilidade:nRowDividerStyle    := LINESTYLE_DARKGRAY
+	   oBrwDisponibilidade:lColDividerComplete := .T.
+	   oBrwDisponibilidade:lFastEdit           := .F.
+	   oBrwDisponibilidade:lHScroll            := .F.
+	   oBrwDisponibilidade:lVScroll            := .F.
+	   oBrwDisponibilidade:l2007               := .F.
+	   *
+	   oBrwDisponibilidade:CreateFromCode()
+   ENDIF
    *
    @ 20, 400 SAY "Já reservado" FONT oFont1 TRANSPARENT PIXEL
    if temSenha
