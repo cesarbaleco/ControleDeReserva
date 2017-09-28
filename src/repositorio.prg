@@ -2,8 +2,8 @@
 
 Function CriarTabelas()
 
-   if !lIsDir(SIS_DB)
-      if !lMkDir(SIS_DB)
+   IF !lIsDir(SIS_DB)
+      IF !lMkDir(SIS_DB)
          MsgStop("Não é possível prosseguir sem o diretório de dados!","Erro")
          return .F.
       endif
@@ -12,7 +12,7 @@ Function CriarTabelas()
    MsgMeter({|oMeter,oText,oDlg,lEnd|CriarTabelas_Meter(oMeter,oText,oDlg,lEnd)},"Criando tabelas...","Aguarde um momento")
 	
 Function CriarTabelas_Meter(oMeter,oText,oDlg,lEnd)
-   oMeter:SetTotal(4)
+   oMeter:SetTotal(6)
    oText:SetText("Aguarde, criando tabelas...")
    oMeter:Set(1)
    *
@@ -65,13 +65,29 @@ Function CriarTabelas_Meter(oMeter,oText,oDlg,lEnd)
       DbCreate(SIS_DB+"DISPOR.DBF",aEst)
    ENDIF
 
+   oMeter:Set(5)
+   aEst:={}
+   aadd(aEst,{"ID","N",20,0})
+   aadd(aEst,{"NOME","C",50,0})
+   IF ! File(SIS_DB+"GRUPO.DBF")
+      DbCreate(SIS_DB+"GRUPO.DBF",aEst)
+   ENDIF
+
+   oMeter:Set(6)
+   aEst:={}
+   aadd(aEst,{"ID_RESERVA","N",20,0})
+   aadd(aEst,{"ID_GRUPO","N",20,0})
+   IF ! File(SIS_DB+"RESERVA_GRUPO.DBF")
+      DbCreate(SIS_DB+"RESERVA_GRUPO.DBF",aEst)
+   ENDIF
+
 Function CriarIndice(lApagar)
    Default lApagar:=.f.
 	*
 	CLOSE DATA
 	*
-	if !lIsDir(SIS_DB)
-      if !lMkDir(SIS_DB)
+	IF !lIsDir(SIS_DB)
+      IF !lMkDir(SIS_DB)
          MsgStop("Não é possível prosseguir sem o diretório de dados!","Erro")
          return .F.
       endif
@@ -91,6 +107,8 @@ Function CriarIndice(lApagar)
 		DELETE FILE (SIS_DB+"RESERVA.CDX")
 		DELETE FILE (SIS_DB+"RESERVAS.CDX")
 		DELETE FILE (SIS_DB+"DISPOR.CDX")
+		DELETE FILE (SIS_DB+"GRUPO.CDX")
+		DELETE FILE (SIS_DB+"RESERVA_GRUPO.CDX")
 	ENDIF	
 	*
    MsgMeter({|oMeter,oText,oDlg,lEnd|CriarIndice_Meter(oMeter,oText,oDlg,lEnd)},"Criando indices...","Aguarde um momento")
@@ -98,10 +116,10 @@ Function CriarIndice(lApagar)
 	MemoWrit("VERSAO.CONFIG",SIS_VERSAO)
 Function CriarIndice_Meter(oMeter,oText,oDlg,lEnd)
    *
-   oMeter:SetTotal(4)
+   oMeter:SetTotal(6)
    oText:SetText("Aguarde, indexando...")
    oMeter:Set(1)
-   if !File(SIS_DB+"PESSOA.CDX")
+   IF !File(SIS_DB+"PESSOA.CDX")
       USE &SIS_DB.PESSOA EXCLUSIVE
       IF !NetErr()
          PACK
@@ -113,7 +131,7 @@ Function CriarIndice_Meter(oMeter,oText,oDlg,lEnd)
    CLOSE DATA
    *
    oMeter:Set(2)
-   if !File(SIS_DB+"RESERVA.CDX")
+   IF !File(SIS_DB+"RESERVA.CDX")
       USE &SIS_DB.RESERVA EXCLUSIVE
       IF !NetErr()
          PACK
@@ -124,7 +142,7 @@ Function CriarIndice_Meter(oMeter,oText,oDlg,lEnd)
    CLOSE DATA
    *
    oMeter:Set(3)
-   if !File(SIS_DB+"RESERVAS.CDX")
+   IF !File(SIS_DB+"RESERVAS.CDX")
       USE &SIS_DB.RESERVAS EXCLUSIVE
       IF !NetErr()
          PACK
@@ -137,12 +155,34 @@ Function CriarIndice_Meter(oMeter,oText,oDlg,lEnd)
    CLOSE DATA
    *
    oMeter:Set(4)
-   if !File(SIS_DB+"DISPOR.CDX")
+   IF !File(SIS_DB+"DISPOR.CDX")
       USE &SIS_DB.DISPOR EXCLUSIVE
       IF !NetErr()
          PACK
          INDEX ON ID TAG DISPOR01 TO &SIS_DB.DISPOR 
          INDEX ON IDRESERVA TAG DISPOR02 TO &SIS_DB.DISPOR 
+      ENDIF
+   ENDIF
+   CLOSE DATA
+   *
+   oMeter:Set(5)
+   IF !File(SIS_DB+"GRUPO.CDX")
+      USE &SIS_DB.GRUPO EXCLUSIVE
+      IF !NetErr()
+         PACK
+         INDEX ON ID TAG GRUPO01 TO &SIS_DB.GRUPO 
+         INDEX ON NOME TAG GRUPO02 TO &SIS_DB.GRUPO 
+      ENDIF
+   ENDIF
+   CLOSE DATA
+
+   oMeter:Set(6)
+   IF !File(SIS_DB+"RESERVA_GRUPO.CDX")
+      USE &SIS_DB.RESERVA_GRUPO EXCLUSIVE
+      IF !NetErr()
+         PACK
+         INDEX ON ID_RESERVA TAG RG01 TO &SIS_DB.RESERVA_GRUPO
+         INDEX ON ID_GRUPO   TAG RG02 TO &SIS_DB.RESERVA_GRUPO
       ENDIF
    ENDIF
    CLOSE DATA
