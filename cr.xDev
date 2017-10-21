@@ -1,7 +1,7 @@
 <!--
 ################################################
 # xDevStudio Project - xdev@kssoftware.com.br  #
-# Created @ 23/08/2017 09:29:24                #
+# Created @ 18/10/2017 09:26:51                #
 #                                              #
 ### Standard xDev Config - Layout v1.5 #########
 -->
@@ -11,7 +11,7 @@
    <option targettype="EXE">
    <option outputpath="">
    <option root="($)">
-   <option runpath="">
+   <option runpath="c:\cr">
    <option runparams="">
    <option pathch="include">
    <option pathlib="lib">
@@ -34,8 +34,8 @@
       <option fflagp="Sim">
    </compilerparam>
 
-   <unit filename="src\repositorio.prg" compile="Sim">
-   <unit filename="src\principal.prg" main="true" compile="Sim">
+   <unit filename="src\repositorio.prg" compile="Sim" prg_disabledebug="Não">
+   <unit filename="src\principal.prg" main="true" compile="Sim" prg_disabledebug="Não">
    <unit filename="res\reserva1.res" compile="Sim">
    <unit filename="include\CR.CH" compile="Sim">
 </project>

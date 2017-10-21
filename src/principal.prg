@@ -56,13 +56,21 @@ Function Main()
    DEFINE WINDOW oWnd TITLE SIS_NAME STYLE nOr( WS_POPUP, WS_MAXIMIZE ) COLOR CLR_WHITE, CLR_GREEN
    *
    DEFINE METROPANEL oMetro OF oWnd TITLE SIS_NAME+" "+SIS_VERSAO+IIF( Empty(nomeDoUsuario), ""," Bem-vindo "+nomeDoUsuario) COLOR CLR_WHITE, CLR_BLACK
+
+   DEFINE BRUSH oBrush FILE '.\res\background.png' RESIZE
+   oMetro:SetBrush( oBrush )
+   oBrush:End()
    *
    oMetro:lDesignMode := .F.
    *
-   @ 10,40 BTNBMP oBtnExit RESOURCE "EXIT" SIZE 60,60 PIXEL OF oMetro CENTER NOBORDER TRANSPARENT ACTION oWnd:End()
-   *
-   @ 10,ScreenWidth()-250 RBBTN oBtnLogo BITMAP '.\RES\LOGO.PNG' ADJUST TRANSPARENT SIZE 200,110 OF oMetro CENTER NOBORDER PIXEL
-   *
+	DEFINE METROBUTTON oBtnSair OF oMetro ;
+       COLOR   CLR_WHITE,METRO_RED ;
+       CAPTION   "Sair do Programa" ALIGN "TOPLEFT" ;
+       BITMAP   "EXIT" BMPALIGN   "TOPRIGHT" ;
+       SIZE   40, 40 LARGE;
+       GROUP 1;
+		 ACTION   {|o| oWnd:End() }
+
    if temSenha
       DEFINE METROBUTTON oBtnCadRes OF oMetro ;
        COLOR   CLR_WHITE,METRO_GREEN ;
@@ -83,8 +91,8 @@ Function Main()
       DEFINE METROBUTTON oBtnCadPes OF oMetro ;
        COLOR   CLR_WHITE,METRO_GREEN ;
        CAPTION   "Cadastro de Pessoas" ALIGN "TOPLEFT" ;
-       BITMAP   "PESSOA" BMPALIGN   "TOPRIGHT" ;
-       SIZE   40, 40 LARGE;
+       BITMAP   ".\res\people.png" BMPALIGN   "TOPRIGHT" ;
+       SIZE   64, 64 LARGE;
        GROUP 1;
 		 ACTION   {|o| ManterPessoa() }
 
@@ -104,11 +112,10 @@ Function Main()
        GROUP 1;
 		 ACTION   {|o| ImportarAlunos() }
    endif
-
-   // MsgRun("Carregando botoes...","Aguarde...",{||CarregaBotoes()})
-    MsgRun("Carregando botoes...","Aguarde...",{||CarregaBotoesGrupos()})
+	*
+   MsgRun("Carregando botoes...","Aguarde...",{||CarregaBotoesGrupos()})
    *
-   ACTIVATE WINDOW oWnd MAXIMIZED ON INIT (oMetro:Show())
+   ACTIVATE WINDOW oWnd MAXIMIZED ON INIT (oMetro:Show(),BringWindowToTop( oWnd:hWnd ))
 
 Function CarregaBotoesGrupos()
 	*
@@ -165,12 +172,19 @@ Function CarregaBotoesReserva_1(nGrupo)
    *
    DEFINE METROPANEL oMetroReserva OF oWndReserva TITLE cNomeGrupo COLOR CLR_WHITE, CLR_BLACK
    *
-   oMetroReserva:lDesignMode := .F.
+   DEFINE BRUSH oBrushReserva FILE '.\res\background.png' RESIZE
+   oMetroReserva:SetBrush( oBrushReserva )
+   oBrushReserva:End()
    *
-   @ 10,40 BTNBMP oBtnExitReserva RESOURCE "EXIT" SIZE 60,60 PIXEL OF oMetroReserva CENTER NOBORDER TRANSPARENT ACTION oWndReserva:End()
+	oMetroReserva:lDesignMode := .F.
    *
-   @ 10,ScreenWidth()-250 RBBTN oBtnLogo BITMAP '.\RES\LOGO.PNG' ADJUST TRANSPARENT SIZE 200,110 OF oMetroReserva CENTER NOBORDER PIXEL
-   *
+	DEFINE METROBUTTON oBtnSairReserva OF oMetroReserva ;
+       COLOR   CLR_WHITE,METRO_OLIVE ;
+       CAPTION   "Retornar" ALIGN "TOPLEFT" ;
+       BITMAP   "EXIT" BMPALIGN   "TOPRIGHT" ;
+       SIZE   40, 40 ;
+       GROUP 1;
+		 ACTION   {|o| oWndReserva:End() }
 
    select reserva_grupo
    go top
@@ -181,22 +195,35 @@ Function CarregaBotoesReserva_1(nGrupo)
       set order to 1
       seek reserva_grupo->id_reserva
 		
-		DEFINE METROBUTTON &cBtn OF oMetroReserva ;
-       COLOR   CLR_WHITE,METRO_GREEN ;
-       CAPTION   "Reserva" ALIGN "TOPLEFT" ;
-       BITMAP   "ITEM" BMPALIGN   "TOPRIGHT" ;
-       SIZE   40, 40 ;
-       BODYTEXT Reserva_Status() TEXTALIGN   "BOTTOMLEFT" TEXTFONT oTextFont ;
-       ACTION {|o| Reservar( o:Cargo ) }
-      *
+		cBodyText:=Reserva_Status()
+		
+  		if len(StrToken(cBodyText,1,";"))>8
+			DEFINE METROBUTTON &cBtn OF oMetroReserva ;
+	       COLOR   CLR_WHITE,METRO_GREEN ;
+	       CAPTION   "Reserva" ALIGN "TOPLEFT" ;
+	       BITMAP   "ITEM" BMPALIGN   "TOPRIGHT" ;
+	       SIZE   40, 40 LARGE;
+	       BODYTEXT cBodyText TEXTALIGN   "BOTTOMLEFT" TEXTFONT oTextFont ;
+	       ACTION {|o| Reservar( o:Cargo ) }
+      else
+			DEFINE METROBUTTON &cBtn OF oMetroReserva ;
+	       COLOR   CLR_WHITE,METRO_GREEN ;
+	       CAPTION   "Reserva" ALIGN "TOPLEFT" ;
+	       BITMAP   "ITEM" BMPALIGN   "TOPRIGHT" ;
+	       SIZE   40, 40 ;
+	       BODYTEXT cBodyText TEXTALIGN   "BOTTOMLEFT" TEXTFONT oTextFont ;
+	       ACTION {|o| Reservar( o:Cargo ) }
+		endif
+		*
       oBtnMT:=&cBtn
       oBtnMT:Cargo := reserva_grupo->id_reserva
-      aadd(aBotoes,oBtnMT)
+		*
+		aadd(aBotoes,oBtnMT)
       select reserva_grupo
       skip
    end
 
-  ACTIVATE WINDOW oWndReserva MAXIMIZED ON INIT (oMetroReserva:Show()) VALID (lFechar:=.T.)
+  ACTIVATE WINDOW oWndReserva MAXIMIZED ON INIT (oMetroReserva:Show(),BringWindowToTop( oWndReserva:hWnd )) VALID (lFechar:=.T.)
  	
    hWndMain    := WndMain():hWnd
    StopUntil( { || lFechar .or. !IsWindow( hWndMain ) } )
@@ -1376,11 +1403,15 @@ function ManterReserva_Excluir(oBrw)
             if rlock()
             	DbDelete()
             endif	
+            select dispor
+            skip
 			end
 			*
 			select reservas
 			oBrw:Delete()
-      endif
+         DbCommitAll()
+         DbUnlockAll()
+		endif
    endif
 function ManterReserva_Alterar(oBrw)
    
